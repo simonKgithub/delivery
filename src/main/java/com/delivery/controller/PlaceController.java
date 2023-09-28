@@ -1,5 +1,6 @@
 package com.delivery.controller;
 
+import com.delivery.dto.NewspaperFormDto;
 import com.delivery.dto.PlaceFormDto;
 import com.delivery.service.PlaceService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class PlaceController {
     @GetMapping("/new")
     public String placeForm(Model model) {
         model.addAttribute("placeFormDto", new PlaceFormDto());
+        model.addAttribute("newspaperFormDto", new NewspaperFormDto());
         return "place/placeForm";
     }
 }

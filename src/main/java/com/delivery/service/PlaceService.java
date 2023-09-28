@@ -16,10 +16,6 @@ public class PlaceService {
 
     public Place savePlace(PlaceFormDto placeFormDto){
         Place place = new Place();
-        place.setAddress(placeFormDto.getAddress());
-        place.setPlaceNm(placeFormDto.getPlaceNm());
-        place.setPlaceDesc(placeFormDto.getPlaceDesc());
-        place.setOrderNum(placeFormDto.getOrderNum());
 
         return placeRepository.save(place);
     }

@@ -3,53 +3,100 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="utf-8"/>
-    <title>place</title>
+    <title>장소저장</title>
 </head>
 <body>
 
-<div>
-    <li>1. 지도 클릭하면 입력창에 해당 좌표 나오게 하기</li>
-    <li>2. 현 위치 버튼 클릭하면 현재 위치 입력창에 찍히도록 하기</li>
+<div class="hAddr">
+    <span class="title">지도중심기준 행정동 주소정보</span>
+    <span id="centerAddr"></span>
 </div>
-
 <div id="map" style="width:500px;height:400px;"></div>
 
 <div>
+    <button id="nowLocation">현 위치 검색</button>
     <form action="" role="form" method="post" th:object="${placeFormDto}">
         <div>
-            <label th:for="address">주소</label>
-            <input type="text" th:field="*{address}" placeholder="주소는 필수 값입니다.">
-            <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}">Incorrect Data</p>
+            <label th:for="xPoint">좌표</label>
+            <input type="text" th:field="*{xPoint}">
+            <input type="text" th:field="*{yPoint}">
         </div>
         <div>
-            <label th:for="placeNm">장소명</label>
-            <input type="text" th:field="*{placeNm}" placeholder="장소명을 입력해주세요.">
+            <label th:for="placeNm">주소(지번)</label>
+            <input type="text" th:field="*{placeNm}" placeholder="주소는 필수 값입니다.">
             <p th:if="${#fields.hasErrors('placeNm')}" th:errors="*{placeNm}">Incorrect Data</p>
         </div>
         <div>
-            <label th:for="placeDesc">장소 설명</label>
-            <input type="text" th:field="*{placeDesc}" placeholder="장소에 대한 설명란입니다.">
+            <label th:for="placeDesc">장소별명</label>
+            <input type="text" th:field="*{placeDesc}" placeholder="장소별명">
             <p th:if="${#fields.hasErrors('placeDesc')}" th:errors="*{placeDesc}">Incorrect Data</p>
         </div>
         <div>
-            <label th:for="orderNum">장소 순번</label>
-            <input type="text" th:field="*{orderNum}" placeholder="장소에 대한 순서를 기록해주세요.">
-            <p th:if="${#fields.hasErrors('orderNum')}" th:errors="*{orderNum}">Incorrect Data</p>
+            <label th:for="deliveryOrder">순서</label>
+            <input type="text" th:field="*{deliveryOrder}" placeholder="순서">
+            <p th:if="${#fields.hasErrors('deliveryOrder')}" th:errors="*{deliveryOrder}">Incorrect Data</p>
+        </div>
+        <div th:object="${newspaperFormDto}">
+            <label th:for="newspaperNm">신문이름</label>
+            <input type="text" th:field="*{newspaperNm}">
+            <label th:for="newspaperDesc">특징</label>
+            <input type="text" th:field="*{newspaperDesc}">
+            <label th:for="count">갯수</label>
+            <input type="text" th:field="*{count}">
         </div>
     </form>
-
+    <button id="addNewspaperBtn">신문추가</button>
+    <div id="newspaperDiv"></div>
 </div>
 
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f3e6f198f96e991c281488985ab9f6f5"></script>
-<script>
-    var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
-    var options = { //지도를 생성할 때 필요한 기본 옵션
-        center: new kakao.maps.LatLng(36.3376482, 127.3933957), //지도의 중심좌표.
-        level: 3 //지도의 레벨(확대, 축소 정도)
-    };
 
-    var map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f3e6f198f96e991c281488985ab9f6f5&libraries=services"></script>
+<script type="text/javascript" src="/js/geo.js"></script>
+<script type="text/javascript">
+    const addNewspaperBtn = document.getElementById("addNewspaperBtn")
+    const newspaperDiv = document.getElementById("newspaperDiv")
+
+    /*Listeners*/
+    // 신문 추가 버튼
+    addNewspaperBtn.addEventListener("click", addNewspaper);
+
+    /*Functions*/
+
+    // 신문 추가 함수
+    function addNewspaper() {
+        const newDiv = document.createElement("div");
+
+        const newNm = document.createElement("input");
+        const newNmLabel = document.createElement("label");
+        const newNmText = document.createTextNode("신문이름");
+
+        const newDesc = document.createElement("input");
+        const newDescLabel = document.createElement("label");
+        const newDescText = document.createTextNode("상세");
+
+        const newCount = document.createElement("input");
+        const newCountLabel = document.createElement("label");
+        const newCountText = document.createTextNode("개수");
+
+        //추가 중 취소
+        const cancelLabel = document.createElement("label");
+        const cancelText = document.createTextNode("cancel");
+
+
+        newNmLabel.appendChild(newNmText);
+        newDescLabel.appendChild(newDescText);
+        newCountLabel.appendChild(newCountText);
+        cancelLabel.appendChild(cancelText);
+
+        newDiv.appendChild(newNmLabel).appendChild(newNm);
+        newDiv.appendChild(newDescLabel).appendChild(newDesc);
+        newDiv.appendChild(newCountLabel).appendChild(newCount);
+        newDiv.appendChild(cancelLabel);
+
+        cancelLabel.addEventListener("click", function(){newDiv.remove()});
+
+        newspaperDiv.prepend(newDiv);
+    }
 </script>
-
 </body>
 </html>

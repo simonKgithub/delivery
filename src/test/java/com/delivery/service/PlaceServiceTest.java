@@ -23,17 +23,17 @@ class PlaceServiceTest {
     @DisplayName("장소 저장 테스트")
     public void savePlaceTest(){
         PlaceFormDto placeFormDto = new PlaceFormDto();
-        placeFormDto.setAddress("테스트주소");
+//        placeFormDto.setAddress("테스트주소");
         placeFormDto.setPlaceNm("테스트장소");
         placeFormDto.setPlaceDesc("테스트설명");
 
-        placeFormDto.setOrderNum(1);
+//        placeFormDto.setOrderNum(1);
 
         Place place = placeService.savePlace(placeFormDto);
 
-        assertEquals(place.getAddress(), placeFormDto.getAddress());
+//        assertEquals(place.getAddress(), placeFormDto.getAddress());
         assertEquals(place.getPlaceNm(), placeFormDto.getPlaceNm());
         assertEquals(place.getPlaceDesc(), placeFormDto.getPlaceDesc());
-        assertEquals(place.getOrderNum(), placeFormDto.getOrderNum());
+//        assertEquals(place.getOrderNum(), placeFormDto.getOrderNum());
     }
 }
