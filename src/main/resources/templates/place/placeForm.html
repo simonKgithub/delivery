@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html>
 <head>
     <meta charset="utf-8"/>
     <title>장소저장</title>
@@ -15,38 +14,32 @@
 
 <div>
     <button id="nowLocation">현 위치 검색</button>
-    <form action="" role="form" method="post" th:object="${placeFormDto}">
-        <div>
-            <label th:for="xPoint">좌표</label>
-            <input type="text" th:field="*{xPoint}">
-            <input type="text" th:field="*{yPoint}">
-        </div>
-        <div>
-            <label th:for="placeNm">주소(지번)</label>
-            <input type="text" th:field="*{placeNm}" placeholder="주소는 필수 값입니다.">
-            <p th:if="${#fields.hasErrors('placeNm')}" th:errors="*{placeNm}">Incorrect Data</p>
-        </div>
-        <div>
-            <label th:for="placeDesc">장소별명</label>
-            <input type="text" th:field="*{placeDesc}" placeholder="장소별명">
-            <p th:if="${#fields.hasErrors('placeDesc')}" th:errors="*{placeDesc}">Incorrect Data</p>
-        </div>
-        <div>
-            <label th:for="deliveryOrder">순서</label>
-            <input type="text" th:field="*{deliveryOrder}" placeholder="순서">
-            <p th:if="${#fields.hasErrors('deliveryOrder')}" th:errors="*{deliveryOrder}">Incorrect Data</p>
-        </div>
-        <div th:object="${newspaperFormDto}">
-            <label th:for="newspaperNm">신문이름</label>
-            <input type="text" th:field="*{newspaperNm}">
-            <label th:for="newspaperDesc">특징</label>
-            <input type="text" th:field="*{newspaperDesc}">
-            <label th:for="count">갯수</label>
-            <input type="text" th:field="*{count}">
-        </div>
-    </form>
     <button id="addNewspaperBtn">신문추가</button>
-    <div id="newspaperDiv"></div>
+    <!--<button id="saveNewPlaceBtn">저장</button>-->
+
+    <form id="placeForm" action="/place/new" role="form" method="post">
+        <button type="submit" id="saveNewPlaceBtn2">저장</button>
+        <div>
+            <div>
+                <label for="xPoint">좌표</label>
+                <input type="text" id="xPoint" name="xPoint">
+                <input type="text" id="yPoint" name="yPoint">
+            </div>
+            <div>
+                <label for="placeNm">주소(지번)</label>
+                <input type="text" id="placeNm" name="placeNm" placeholder="주소는 필수 값입니다.">
+            </div>
+            <div>
+                <label for="placeDesc">장소별명</label>
+                <input type="text" id="placeDesc" name="placeDesc" placeholder="장소별명">
+            </div>
+            <div>
+                <label for="deliveryOrder">순서</label>
+                <input type="text" id="deliveryOrder" name="deliveryOrder" placeholder="순서">
+            </div>
+        </div>
+        <div id="newspaperDiv"></div>
+    </form>
 </div>
 
 
@@ -55,38 +48,75 @@
 <script type="text/javascript">
     const addNewspaperBtn = document.getElementById("addNewspaperBtn")
     const newspaperDiv = document.getElementById("newspaperDiv")
+    const saveNewPlaceBtn = document.getElementById("saveNewPlaceBtn")
+    let newspaperCnt = 0;
+
+    /*ready*/
+    document.addEventListener("DOMContentLoaded", function(){
+        addNewspaperBtn.click();
+    });
 
     /*Listeners*/
+    // 저장 버튼
+    // saveNewPlaceBtn.addEventListener('click', saveNewPlace);
     // 신문 추가 버튼
-    addNewspaperBtn.addEventListener("click", addNewspaper);
+    addNewspaperBtn.addEventListener('click', addNewspaper);
 
     /*Functions*/
+    // form data 저장 함수
+    function saveNewPlace() {
+        let placeForm = document.getElementById("placeForm");
+        let placeFormData = new FormData(placeForm);
+        let serializedPlaceFormData = serialize(placeFormData);
+        let params;
 
+        console.log(JSON.stringify(serializedPlaceFormData));
+    }
+    // form 데이터 가공해서 가져오기
+    function serialize(rawData) {
+        let rtnData = {};
+        for (let [key, value] of rawData) {
+            let sel = document.querySelectorAll("[name=" + key + "]");
+
+            if (sel.length > 1) {
+                if (rtnData[key] === undefined) {
+                    rtnData[key] = [];
+                }
+                rtnData[key].push(value);
+            } else {
+                rtnData[key] = value;
+            }
+        }
+        return rtnData;
+    }
     // 신문 추가 함수
     function addNewspaper() {
         const newDiv = document.createElement("div");
 
         const newNm = document.createElement("input");
         const newNmLabel = document.createElement("label");
-        const newNmText = document.createTextNode("신문이름");
+        newNm.setAttribute('name', 'newspaperFormDtoList['+newspaperCnt+'].newspaperNm');
+        newNm.setAttribute('id', 'newspaperFormDtoList['+newspaperCnt+'].newspaperNm');
+        newNmLabel.innerText = "신문이름";
+        newNmLabel.setAttribute('for', 'newspaperFormDtoList['+newspaperCnt+'].newspaperNm');
 
         const newDesc = document.createElement("input");
         const newDescLabel = document.createElement("label");
-        const newDescText = document.createTextNode("상세");
+        newDesc.setAttribute('name', 'newspaperFormDtoList['+newspaperCnt+'].newspaperDesc');
+        newDesc.setAttribute('id', 'newspaperFormDtoList['+newspaperCnt+'].newspaperDesc');
+        newDescLabel.innerText = "상세내용";
+        newDescLabel.setAttribute('for', 'newspaperFormDtoList['+newspaperCnt+'].newspaperDesc');
 
         const newCount = document.createElement("input");
         const newCountLabel = document.createElement("label");
-        const newCountText = document.createTextNode("개수");
+        newCount.setAttribute('name', 'newspaperFormDtoList['+newspaperCnt+'].count');
+        newCount.setAttribute('id', 'newspaperFormDtoList['+newspaperCnt+'].count');
+        newCountLabel.innerText = "신문개수";
+        newCountLabel.setAttribute('for', 'newspaperFormDtoList['+newspaperCnt+'].count');
 
         //추가 중 취소
         const cancelLabel = document.createElement("label");
-        const cancelText = document.createTextNode("cancel");
-
-
-        newNmLabel.appendChild(newNmText);
-        newDescLabel.appendChild(newDescText);
-        newCountLabel.appendChild(newCountText);
-        cancelLabel.appendChild(cancelText);
+        cancelLabel.innerText = "취소";
 
         newDiv.appendChild(newNmLabel).appendChild(newNm);
         newDiv.appendChild(newDescLabel).appendChild(newDesc);
@@ -96,6 +126,7 @@
         cancelLabel.addEventListener("click", function(){newDiv.remove()});
 
         newspaperDiv.prepend(newDiv);
+        newspaperCnt++;
     }
 </script>
 </body>

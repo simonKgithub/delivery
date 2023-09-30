@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity @Table(name = "newspaper")
 @Getter @Setter @ToString
@@ -22,4 +23,8 @@ public class Newspaper {
 
     @Column(name = "count")
     private int count;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "place_id")
+    private Place place;
 }

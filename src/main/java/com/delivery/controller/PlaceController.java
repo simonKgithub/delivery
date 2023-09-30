@@ -6,8 +6,10 @@ import com.delivery.service.PlaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping(value = "/place")
@@ -17,9 +19,16 @@ public class PlaceController {
     private final PlaceService placeService;
 
     @GetMapping("/new")
-    public String placeForm(Model model) {
+    public String getPlaceForm(Model model) {
+        List<NewspaperFormDto> newspaperFormDtoList = new ArrayList<>();
         model.addAttribute("placeFormDto", new PlaceFormDto());
-        model.addAttribute("newspaperFormDto", new NewspaperFormDto());
+        model.addAttribute("newspaperFormDtoList", newspaperFormDtoList);
+        return "place/placeForm";
+    }
+
+    @PostMapping("/new")
+    public String postPlaceForm(PlaceFormDto placeFormDto, Model model) {
+        System.out.println(placeFormDto.toString());
         return "place/placeForm";
     }
 }

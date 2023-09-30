@@ -37,10 +37,6 @@ public class Place {
     @Enumerated(EnumType.STRING)
     private DeliveryStatus deliveryStatus;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "newspaper_id")
-    private List<Newspaper> newspaperList;
-
     @CreatedDate
     private LocalDateTime regTime;
 
