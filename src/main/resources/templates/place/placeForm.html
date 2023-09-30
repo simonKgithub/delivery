@@ -50,6 +50,7 @@
     const newspaperDiv = document.getElementById("newspaperDiv")
     const saveNewPlaceBtn = document.getElementById("saveNewPlaceBtn")
     let newspaperCnt = 0;
+    let popupTargetId;
 
     /*ready*/
     document.addEventListener("DOMContentLoaded", function(){
@@ -63,6 +64,22 @@
     addNewspaperBtn.addEventListener('click', addNewspaper);
 
     /*Functions*/
+    // 팝업 정보 적용 함수
+    function applyData(rtnData){
+        let popupTargetInput = document.getElementById(popupTargetId);
+        popupTargetInput.value = rtnData;
+    }
+    // 신문 목록 팝업 함수
+    function openNewspaperList(originId) {
+        const popupUrl = "/place/openNewspaperPopup";
+
+        const width = 500;
+        const height = 400;
+        const left = (window.innerWidth - width) / 2;
+        const top = (window.innerHeight - height) / 2;
+
+        window.open(popupUrl, "_blank", "width=" + width + ",height=" + height + ",left=" + left + ", top=" + top);
+    }
     // form data 저장 함수
     function saveNewPlace() {
         let placeForm = document.getElementById("placeForm");
@@ -124,6 +141,10 @@
         newDiv.appendChild(cancelLabel);
 
         cancelLabel.addEventListener("click", function(){newDiv.remove()});
+        newNm.addEventListener("click", function(){
+            openNewspaperList();
+            popupTargetId = newNm.getAttribute('id');
+        });
 
         newspaperDiv.prepend(newDiv);
         newspaperCnt++;

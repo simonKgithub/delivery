@@ -2,6 +2,8 @@ package com.delivery.controller;
 
 import com.delivery.dto.NewspaperFormDto;
 import com.delivery.dto.PlaceFormDto;
+import com.delivery.entity.Newspaper;
+import com.delivery.service.NewspaperService;
 import com.delivery.service.PlaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,17 @@ import java.util.List;
 public class PlaceController {
 
     private final PlaceService placeService;
+    private final NewspaperService newspaperService;
+
+    @GetMapping("/openNewspaperPopup")
+    public String getOpenNewspaperPopup(Model model){
+
+        List<Newspaper> newspaperList = newspaperService.findAllNewspaper();
+
+        model.addAttribute("newspaperList", newspaperList);
+
+        return "place/newspaperPopup";
+    }
 
     @GetMapping("/new")
     public String getPlaceForm(Model model) {

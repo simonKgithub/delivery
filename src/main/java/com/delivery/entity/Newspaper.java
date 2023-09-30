@@ -17,14 +17,4 @@ public class Newspaper {
 
     @Column(name = "newspaper_nm")
     private String newspaperNm;
-
-    @Column(name = "newspaper_desc")
-    private String newspaperDesc;
-
-    @Column(name = "count")
-    private int count;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "place_id")
-    private Place place;
 }
