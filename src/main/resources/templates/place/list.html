@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>장소목록</title>
+</head>
+<body>
+
+<div>
+    <div th:object="${placeList}">
+        <div th:each="place: ${placeList}">
+            <div>
+                <label th:for="${place.xPoint}">좌표</label>
+                <p th:id="${place.xPoint}" th:text="${place.xPoint}"></p>
+                <p th:id="${place.yPoint}" th:text="${place.yPoint}"></p>
+            </div>
+            <div>
+                <label th:for="${place.placeNm}">주소(지번)</label>
+                <p th:id="${place.placeNm}" th:text="${place.placeNm}"></p>
+            </div>
+            <div>
+                <label th:for="${place.placeDesc}">상세설명</label>
+                <p th:id="${place.placeDesc}" th:text="${place.placeDesc}"></p>
+            </div>
+            <div>
+                <label th:for="${place.deliveryOrder}">순번</label>
+                <p th:id="${place.deliveryOrder}" th:text="${place.deliveryOrder}"></p>
+            </div>
+            <div>
+                <label th:for="${place.deliveryStatus}">배송여부</label>
+                <p th:id="${place.deliveryStatus}" th:text="${place.deliveryStatus}"></p>
+            </div>
+            <div th:object="${newspaperList}">
+                <div th:each="newspaper: ${newspaperList}">
+                    <div>
+                        <label th:for="${newspaper.newspaperNm}"></label>
+                        <p th:id="${newspaper.newspaperNm}" th:text="${newspaper.newspaperNm}"></p>
+                    </div>
+                    <div>
+                        <label th:for="${newspaper.newspaperDesc}"></label>
+                        <p th:id="${newspaper.newspaperDesc}" th:text="${newspaper.newspaperDesc}"></p>
+                    </div>
+                    <div>
+                        <label th:for="${newspaper.count}"></label>
+                        <p th:id="${newspaper.count}" th:text="${newspaper.count}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+</script>
+</body>
+</html>

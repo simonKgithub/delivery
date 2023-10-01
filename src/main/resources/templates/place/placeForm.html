@@ -14,7 +14,7 @@
 
 <div>
     <button id="nowLocation">현 위치 검색</button>
-    <button id="addNewspaperBtn">신문추가</button>
+    <button id="addPlaceNewsBtn">신문추가</button>
     <!--<button id="saveNewPlaceBtn">저장</button>-->
 
     <form id="placeForm" action="/place/new" role="form" method="post">
@@ -27,7 +27,7 @@
             </div>
             <div>
                 <label for="placeNm">주소(지번)</label>
-                <input type="text" id="placeNm" name="placeNm" placeholder="주소는 필수 값입니다.">
+                <input type="text" id="placeNm" name="placeNm" placeholder="주소(지번)">
             </div>
             <div>
                 <label for="placeDesc">장소별명</label>
@@ -38,7 +38,7 @@
                 <input type="text" id="deliveryOrder" name="deliveryOrder" placeholder="순서">
             </div>
         </div>
-        <div id="newspaperDiv"></div>
+        <div id="placeNewsDiv"></div>
     </form>
 </div>
 
@@ -46,32 +46,38 @@
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f3e6f198f96e991c281488985ab9f6f5&libraries=services"></script>
 <script type="text/javascript" src="/js/geo.js"></script>
 <script type="text/javascript">
-    const addNewspaperBtn = document.getElementById("addNewspaperBtn")
-    const newspaperDiv = document.getElementById("newspaperDiv")
+    const addPlaceNewsBtn = document.getElementById("addPlaceNewsBtn")
+    const placeNewsDiv = document.getElementById("placeNewsDiv")
     const saveNewPlaceBtn = document.getElementById("saveNewPlaceBtn")
-    let newspaperCnt = 0;
-    let popupTargetId;
+    let placeNewsCnt = 0;
+    let popupTargetId1;
+    let popupTargetId2;
 
     /*ready*/
     document.addEventListener("DOMContentLoaded", function(){
-        addNewspaperBtn.click();
+        addPlaceNewsBtn.click();
     });
 
     /*Listeners*/
     // 저장 버튼
     // saveNewPlaceBtn.addEventListener('click', saveNewPlace);
     // 신문 추가 버튼
-    addNewspaperBtn.addEventListener('click', addNewspaper);
+    addPlaceNewsBtn.addEventListener('click', addPlaceNews);
 
     /*Functions*/
     // 팝업 정보 적용 함수
-    function applyData(rtnData){
-        let popupTargetInput = document.getElementById(popupTargetId);
-        popupTargetInput.value = rtnData;
+    function applyData(params){
+        const rtnData = params.rtnData;
+        const newsId = params.newsId;
+
+        let popupTargetInput1 = document.getElementById(popupTargetId1);
+        let popupTargetInput2 = document.getElementById(popupTargetId2);
+        popupTargetInput1.value = rtnData;
+        popupTargetInput2.value = newsId;
     }
     // 신문 목록 팝업 함수
-    function openNewspaperList(originId) {
-        const popupUrl = "/place/openNewspaperPopup";
+    function openNewsList(originId) {
+        const popupUrl = "/place/openNewsPopup";
 
         const width = 500;
         const height = 400;
@@ -107,29 +113,35 @@
         return rtnData;
     }
     // 신문 추가 함수
-    function addNewspaper() {
+    function addPlaceNews() {
         const newDiv = document.createElement("div");
 
         const newNm = document.createElement("input");
         const newNmLabel = document.createElement("label");
-        newNm.setAttribute('name', 'newspaperFormDtoList['+newspaperCnt+'].newspaperNm');
-        newNm.setAttribute('id', 'newspaperFormDtoList['+newspaperCnt+'].newspaperNm');
+        newNm.setAttribute('name', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsNm');
+        newNm.setAttribute('id', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsNm');
         newNmLabel.innerText = "신문이름";
-        newNmLabel.setAttribute('for', 'newspaperFormDtoList['+newspaperCnt+'].newspaperNm');
+        newNmLabel.setAttribute('for', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsNm');
 
         const newDesc = document.createElement("input");
         const newDescLabel = document.createElement("label");
-        newDesc.setAttribute('name', 'newspaperFormDtoList['+newspaperCnt+'].newspaperDesc');
-        newDesc.setAttribute('id', 'newspaperFormDtoList['+newspaperCnt+'].newspaperDesc');
+        newDesc.setAttribute('name', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsDesc');
+        newDesc.setAttribute('id', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsDesc');
         newDescLabel.innerText = "상세내용";
-        newDescLabel.setAttribute('for', 'newspaperFormDtoList['+newspaperCnt+'].newspaperDesc');
+        newDescLabel.setAttribute('for', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsDesc');
 
         const newCount = document.createElement("input");
         const newCountLabel = document.createElement("label");
-        newCount.setAttribute('name', 'newspaperFormDtoList['+newspaperCnt+'].count');
-        newCount.setAttribute('id', 'newspaperFormDtoList['+newspaperCnt+'].count');
+        newCount.setAttribute('name', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsCount');
+        newCount.setAttribute('id', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsCount');
         newCountLabel.innerText = "신문개수";
-        newCountLabel.setAttribute('for', 'newspaperFormDtoList['+newspaperCnt+'].count');
+        newCountLabel.setAttribute('for', 'placeNewsDtoList['+placeNewsCnt+'].placeNewsCount');
+
+        // 뉴스 id 담기
+        const newsId = document.createElement("input");
+        newsId.setAttribute('id', 'placeNewsDtoList['+placeNewsCnt+'].newsId');
+        newsId.setAttribute('name', 'placeNewsDtoList['+placeNewsCnt+'].newsId');
+        newsId.setAttribute('hidden', true);
 
         //추가 중 취소
         const cancelLabel = document.createElement("label");
@@ -139,15 +151,17 @@
         newDiv.appendChild(newDescLabel).appendChild(newDesc);
         newDiv.appendChild(newCountLabel).appendChild(newCount);
         newDiv.appendChild(cancelLabel);
+        newDiv.appendChild(newsId);
 
         cancelLabel.addEventListener("click", function(){newDiv.remove()});
         newNm.addEventListener("click", function(){
-            openNewspaperList();
-            popupTargetId = newNm.getAttribute('id');
+            openNewsList();
+            popupTargetId1 = newNm.getAttribute('id');
+            popupTargetId2 = newsId.getAttribute('id');
         });
 
-        newspaperDiv.prepend(newDiv);
-        newspaperCnt++;
+        placeNewsDiv.prepend(newDiv);
+        placeNewsCnt++;
     }
 </script>
 </body>

@@ -5,16 +5,15 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.List;
 
-@Entity @Table(name = "newspaper")
+@Entity @Table(name = "news")
 @Getter @Setter @ToString
-public class Newspaper {
+public class News {
 
-    @Id @Column(name = "newspaper_id")
+    @Id @Column(name = "news_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "newspaper_nm")
-    private String newspaperNm;
+    @Column(name = "news_nm")
+    private String newsNm;
 }

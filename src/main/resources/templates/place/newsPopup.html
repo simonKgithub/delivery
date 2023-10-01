@@ -7,10 +7,10 @@
 <body>
 
 <div>
-    <button id="addNewspaperBtn">신문추가</button>
-    <div th:object="${newspaperList}">
-        <div th:each="newspaper: ${newspaperList}">
-            <p th:id="${newspaper.id}" th:text="${newspaper.newspaperNm}"></p>
+    <button id="addNewsBtn">신문추가</button>
+    <div th:object="${newsList}">
+        <div th:each="news: ${newsList}">
+            <p th:id="${news.id}" th:text="${news.newsNm}"></p>
         </div>
     </div>
 </div>
@@ -22,10 +22,12 @@
 
     for (let i = 0; i < pTags.length; i++) {
         pTags[i].addEventListener("click", function(){
-           const rtnData = this.innerHTML;
+            let params = {};
+            params.rtnData = this.innerHTML;
+            params.newsId = this.id;
 
-            if (confirm(rtnData + "을 선택하시겠습니까?")) {
-                parentWindow.applyData(rtnData);
+            if (confirm(params.rtnData + "을 선택하시겠습니까?")) {
+                parentWindow.applyData(params);
                 window.close();
             }
         });

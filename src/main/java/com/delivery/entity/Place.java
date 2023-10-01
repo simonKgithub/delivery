@@ -29,7 +29,7 @@ public class Place {
     private String placeNm;
 
     @Column(name = "place_desc")
-    private int placeDesc;
+    private String placeDesc;
 
     @Column(name = "delivery_order")
     private int deliveryOrder;
