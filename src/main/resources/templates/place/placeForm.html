@@ -9,9 +9,9 @@
 <div class="hAddr">
     <span class="title">지도중심기준 행정동 주소정보</span>
     <span id="centerAddr"></span>
+    <button id="moveToPlacePage" onclick="moveToPlacePage()">돌아가기</button>
 </div>
-<div id="map" style="width:500px;height:400px;"></div>
-
+<div id="map" style="width:50%;height:400px;"></div>
 <div>
     <button id="nowLocation">현 위치 검색</button>
     <button id="addPlaceNewsBtn">신문추가</button>
@@ -30,7 +30,7 @@
                 <input type="text" id="placeNm" name="placeNm" placeholder="주소(지번)">
             </div>
             <div>
-                <label for="placeDesc">장소별명</label>
+                <label for="placeDesc">상세설명</label>
                 <input type="text" id="placeDesc" name="placeDesc" placeholder="장소별명">
             </div>
             <div>
@@ -65,6 +65,10 @@
     addPlaceNewsBtn.addEventListener('click', addPlaceNews);
 
     /*Functions*/
+    // 돌아가기
+    function moveToPlacePage(){
+        window.location.href = "/place/list";
+    }
     // 팝업 정보 적용 함수
     function applyData(params){
         const rtnData = params.rtnData;

@@ -1,5 +1,6 @@
 package com.delivery.dto;
 
+import com.delivery.constant.DeliveryStatus;
 import com.delivery.entity.Place;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,8 @@ import java.util.List;
 
 @Getter @Setter @ToString
 public class PlaceDto {
+    private String id;
+
     private String xPoint;
 
     private String yPoint;
@@ -20,6 +23,8 @@ public class PlaceDto {
     private String placeDesc;
 
     private int deliveryOrder;
+
+    private DeliveryStatus deliveryStatus;
 
     private List<PlaceNewsDto> placeNewsDtoList = new ArrayList<>();
 

@@ -4,55 +4,93 @@
     <meta charset="utf-8"/>
     <title>장소목록</title>
 </head>
+<style>
+    table {
+        width: 50%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:hover {
+        background-color: #e5e5e5;
+    }
+</style>
 <body>
 
-<div>
-    <div th:object="${placeList}">
-        <div th:each="place: ${placeList}">
-            <div>
-                <label th:for="${place.xPoint}">좌표</label>
-                <p th:id="${place.xPoint}" th:text="${place.xPoint}"></p>
-                <p th:id="${place.yPoint}" th:text="${place.yPoint}"></p>
-            </div>
-            <div>
-                <label th:for="${place.placeNm}">주소(지번)</label>
-                <p th:id="${place.placeNm}" th:text="${place.placeNm}"></p>
-            </div>
-            <div>
-                <label th:for="${place.placeDesc}">상세설명</label>
-                <p th:id="${place.placeDesc}" th:text="${place.placeDesc}"></p>
-            </div>
-            <div>
-                <label th:for="${place.deliveryOrder}">순번</label>
-                <p th:id="${place.deliveryOrder}" th:text="${place.deliveryOrder}"></p>
-            </div>
-            <div>
-                <label th:for="${place.deliveryStatus}">배송여부</label>
-                <p th:id="${place.deliveryStatus}" th:text="${place.deliveryStatus}"></p>
-            </div>
-            <div th:object="${newspaperList}">
-                <div th:each="newspaper: ${newspaperList}">
-                    <div>
-                        <label th:for="${newspaper.newspaperNm}"></label>
-                        <p th:id="${newspaper.newspaperNm}" th:text="${newspaper.newspaperNm}"></p>
-                    </div>
-                    <div>
-                        <label th:for="${newspaper.newspaperDesc}"></label>
-                        <p th:id="${newspaper.newspaperDesc}" th:text="${newspaper.newspaperDesc}"></p>
-                    </div>
-                    <div>
-                        <label th:for="${newspaper.count}"></label>
-                        <p th:id="${newspaper.count}" th:text="${newspaper.count}"></p>
-                    </div>
-                </div>
+<div class="hAddr">
+    <span class="title">지도중심기준 행정동 주소정보</span>
+    <span id="centerAddr"></span>
+    <button id="moveToPlaceNewPage" onclick="moveToPlaceNewPage()">장소추가</button>
+</div>
+<div id="map" style="width:50%;height:400px;"></div>
+<table th:object="${placeDtoList}">
+    <thead>
+        <tr>
+            <th>순번</th>
+            <th>상세설명</th>
+            <th>주소</th>
+            <th>기타</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="placeDto: ${placeDtoList}">
+            <td th:text="${placeDto.deliveryOrder}">순번</td>
+            <td th:text="${placeDto.placeDesc}">상세설명</td>
+            <td th:text="${placeDto.placeNm}">주소</td>
+            <td th:id="${placeDto.id}" type="button" >신문특징 서술하기</td>
+            <td th:id="xPoint" th:value="${placeDto.xPoint}" hidden="true">x좌표</td>
+            <td th:id="yPoint" th:value="${placeDto.yPoint}" hidden="true">y좌표</td>
+            <td th:id="deliveryStatus" th:value="${placeDto.deliveryStatus}" hidden="true">배달여부</td>
+        </tr>
+    </tbody>
+    <!--<div th:object="${placeDtoList}">
+        <div th:each="placeDto: ${placeDtoList}">
+            <div th:id="${placeDto.id}">
+                순번[<label th:text="${placeDto.deliveryOrder}"></label>]
+                상세설명[<label th:text="${placeDto.placeDesc}"></label>]
+                주소[<label th:text="${placeDto.placeNm}"></label>]
+                <input th:type="text" hidden="true" th:value="${placeDto.xPoint}">
+                <input th:type="text" hidden="true" th:value="${placeDto.yPoint}">
+                <input th:type="text" hidden="true" th:value="${placeDto.deliveryStatus}">
             </div>
         </div>
-    </div>
-</div>
+    </div>-->
+</table>
 
-
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f3e6f198f96e991c281488985ab9f6f5&libraries=services"></script>
+<script type="text/javascript" src="/js/geo.js"></script>
 <script type="text/javascript">
+    const trTags = document.getElementsByTagName('tr');
 
+    /*AddEvent Area
+    * */
+    // 클릭 이벤트 생성 및 좌표 구하기
+    for (let i = 0; i < trTags.length; i++) {
+        trTags[i].addEventListener("click", function(event){
+            const xPoint = event.target.parentElement.querySelector('#xPoint').getAttribute('value');
+            const yPoint = event.target.parentElement.querySelector('#yPoint').getAttribute('value');
+            console.log(xPoint, yPoint);
+        });
+    }
+
+    /*Function Area
+    * */
+    // 좌표로 지도 이동하기
+    function moveToXYPoint(){
+
+    }
+    // 장소 추가로 이동하기
+    function moveToPlaceNewPage(){
+        window.location.href="/place/new";
+    }
 </script>
 </body>
 </html>

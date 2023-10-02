@@ -25,7 +25,7 @@ public class PlaceService {
         place.setXPoint(placeDto.getXPoint());
         place.setYPoint(placeDto.getYPoint());
         place.setPlaceNm(placeDto.getPlaceNm());
-        place.setPlaceDesc(place.getPlaceDesc());
+        place.setPlaceDesc(placeDto.getPlaceDesc());
         place.setDeliveryOrder(placeDto.getDeliveryOrder());
         place.setDeliveryStatus(DeliveryStatus.Y);
         place.setRegTime(LocalDateTime.now());

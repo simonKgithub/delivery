@@ -26,6 +26,14 @@ public class PlaceController {
     private final PlaceNewsService placeNewsService;
     private final NewsService newsService;
 
+    @GetMapping("/list")
+    public String getPlaceList(Model model){
+        List<PlaceDto> placeDtoList = placeService.findAllPlaces();
+        model.addAttribute("placeDtoList", placeDtoList);
+
+        return "place/list";
+    }
+
     @GetMapping("/openNewsPopup")
     public String getOpenNewsPopup(Model model){
         List<News> newsList = newsService.findAllNewspaper();
@@ -56,6 +64,6 @@ public class PlaceController {
         model.addAttribute("placeDtoList", placeDtoList);
 //        model.addAttribute("placeNewsList", placeNewsList);
 
-        return "/place/list";
+        return "redirect:list";
     }
 }
