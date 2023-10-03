@@ -28,7 +28,7 @@ public class PlaceController {
 
     @GetMapping("/list")
     public String getPlaceList(Model model){
-        List<PlaceDto> placeDtoList = placeService.findAllPlaces();
+        List<PlaceDto> placeDtoList = placeService.findPlacesWithNews();
         model.addAttribute("placeDtoList", placeDtoList);
 
         return "place/list";
@@ -53,16 +53,12 @@ public class PlaceController {
     public String postPlaceForm(PlaceDto placeDto, Model model) {
         //유효성 체크 필요
 
-        // 장소 저장
+        // 장소 저장 및 신문 저장
         Place newPlace = placeService.savePlace(placeDto);
-        // 신문 저장
         placeNewsService.savePlaceNews(placeDto.getPlaceNewsDtoList(), newPlace);
 
-        List<PlaceDto> placeDtoList = placeService.findAllPlaces();
-//        List<PlaceNews> placeNewsList = placeNewsService.findAllNewspaper();
-
+        List<PlaceDto> placeDtoList = placeService.findPlacesWithNews();
         model.addAttribute("placeDtoList", placeDtoList);
-//        model.addAttribute("placeNewsList", placeNewsList);
 
         return "redirect:list";
     }

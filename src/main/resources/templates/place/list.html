@@ -29,6 +29,7 @@
     <span class="title">지도중심기준 행정동 주소정보</span>
     <span id="centerAddr"></span>
     <button id="moveToPlaceNewPage" onclick="moveToPlaceNewPage()">장소추가</button>
+    <button id="nowLocation">현 위치 검색</button>
 </div>
 <div id="map" style="width:50%;height:400px;"></div>
 <table th:object="${placeDtoList}">
@@ -49,6 +50,9 @@
             <td th:id="xPoint" th:value="${placeDto.xPoint}" hidden="true">x좌표</td>
             <td th:id="yPoint" th:value="${placeDto.yPoint}" hidden="true">y좌표</td>
             <td th:id="deliveryStatus" th:value="${placeDto.deliveryStatus}" hidden="true">배달여부</td>
+            <td th:each="placeNewsDto : ${placeDto.placeNewsDtoList}" hidden="true">배달신문
+                <p th:id="placeNewsDto" th:text="${placeNewsDto.placeNewsDesc + ': ' + placeNewsDto.placeNewsNm + ' ['+placeNewsDto.placeNewsCount + '개]'}" />
+            </td>
         </tr>
     </tbody>
     <!--<div th:object="${placeDtoList}">
@@ -77,15 +81,46 @@
         trTags[i].addEventListener("click", function(event){
             const xPoint = event.target.parentElement.querySelector('#xPoint').getAttribute('value');
             const yPoint = event.target.parentElement.querySelector('#yPoint').getAttribute('value');
-            console.log(xPoint, yPoint);
+            const placeNewsDtos = event.target.parentElement.querySelectorAll('#placeNewsDto');
+
+            moveToXYPoint(xPoint, yPoint, placeNewsDtos);
         });
     }
 
     /*Function Area
     * */
-    // 좌표로 지도 이동하기
-    function moveToXYPoint(){
+    // 좌표로 지도 이동하기 및 윈도우 내용 표출
+    function moveToXYPoint(xPoint, yPoint, placeNewsDtos){
+        // HTML5의 geolocation으로 사용할 수 있는지 확인합니다
+        if (navigator.geolocation) {
+            searchDetailAddrFromXYPoint(xPoint,yPoint, function(result, status){
+                if (status === kakao.maps.services.Status.OK) {
+                    let locPosition = new kakao.maps.LatLng(xPoint, yPoint);
+                    let content = document.createElement('div');
+                    content.setAttribute('style', 'padding:5px');
+                    placeNewsDtos.forEach((placeNewsDto) => {
+                        let innerContent = document.createElement('div');
+                        innerContent.append(placeNewsDto.innerHTML);
+                        content.append(innerContent);
+                    });
 
+                    // 마커를 클릭한 위치에 표시합니다
+                    marker.setPosition(locPosition);
+                    marker.setMap(map);
+
+                    // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
+                    infowindow.setContent(content);
+                    infowindow.open(map, marker);
+
+                    map.setCenter(locPosition);
+                }
+            });
+        }
+    }
+    // 좌표로 현재 위치 검색하기
+    function searchDetailAddrFromXYPoint(xPoint, yPoint, callback) {
+        // 좌표로 법정동 상세 주소 정보를 요청합니다
+        geocoder.coord2Address(yPoint, xPoint, callback);
     }
     // 장소 추가로 이동하기
     function moveToPlaceNewPage(){
