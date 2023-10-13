@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>배달지</title>
+</head>
+<style>
+    table {
+        width: 50%;
+        border-collapse: collapse;
+        padding: 10px;
+    }
+    th, td {
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:hover {
+        background-color: #e5e5e5;
+    }
+</style>
+<body>
+<div style="padding-left:20px">
+    <span class="title">지도중심기준 주소 정보</span>
+    <span id="centerAddr"></span>
+</div>
+<div id="tableArea" style="display:flex; padding:20px">
+    <div id="map" style="width:70%;height:600px;"></div>
+    <table th:object="${areaDtoList}">
+        <thead>
+            <tr>
+                <th>배달지명</th>
+                <th>담당자</th>
+                <th>필요신문 및 개수</th>
+                <th>기타</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr th:each="areaDto: ${areaDtoList}">
+                <td th:name="${areaDto.areaId}" hidden="true">배달지ID</td>
+                <td th:text="${areaDto.areaNm}">배달지명</td>
+                <td th:text="${areaDto.areaManager}">담당자</td>
+                <td>
+                </td>
+                <td><button id="detailBtn">상세보기</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div style="padding-right: 20px;display: flex; justify-content: flex-end;">
+    <button onclick="addNewArea()">배달지추가</button>
+</div>
+
+
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f3e6f198f96e991c281488985ab9f6f5&libraries=services"></script>
+<script type="text/javascript" src="/js/geo.js"></script>
+<script type="text/javascript">
+    /* Parameter Area
+    * */
+    const tbody = document.getElementById('tbody');
+    const buttons = document.getElementsByTagName('button');
+
+    /*함수 실행
+    * */
+
+    /*AddListenerEvent Area
+    * */
+    // 수정하기 버튼 클릭 이벤트 생성
+    for (let i = 0; i < buttons.length; i++) {
+        if (buttons[i].getAttribute('id') == 'detailBtn') {
+            buttons[i].addEventListener('click', detailArea);
+        }
+    }
+
+    /*Function Area
+    * */
+    // 배달지 변경 함수
+    function detailArea(){
+        const areaId = this.parentElement.parentElement.cells[0].getAttribute('name');
+        window.location.href = '/place/list/' + areaId;
+    }
+    // 배달지 저장 함수
+    function saveArea(nm, manager) {
+        let xhr = new XMLHttpRequest(); // XMLHttpRequest 객체 생성
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    let response = xhr.responseText; // 서버 응답 데이터
+                    console.log(response);
+                    location.reload();
+                } else {
+                    alert("저장에 실패하였습니다.");
+                }
+            }
+        };
+
+        let data = {
+            areaId: '',
+            areaNm: nm,
+            areaManager: manager,
+        };
+
+        // 객체를 form 형식으로 변환
+        // let params = Object.keys(data).map(function (key) {
+        //     return encodeURIComponent(key) + '=' + encodeURIComponent(data[key]);
+        // });
+
+        //객체를 JSON 문자열로 변환
+        const params = JSON.stringify(data);
+
+        xhr.open('POST', '/area/new', true); // HTTP 메서드와 엔드포인트 설정
+        // xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); // Content-Type 헤더 설정
+        xhr.setRequestHeader('Content-Type', 'application/json'); // Content-Type 헤더 설정
+
+        xhr.send(params);
+    }
+    // 배달지 추가 함수
+    function addNewArea() {
+        const tr = document.createElement("tr");
+
+        const tdNm = document.createElement('td');
+        const inputNm = document.createElement('input');
+        tdNm.appendChild(inputNm);
+
+        const tdManager = document.createElement('td');
+        const inputManager = document.createElement('input');
+        tdManager.appendChild(inputManager);
+
+        const tdSave = document.createElement('td');
+        const btnSave = document.createElement('button');
+        btnSave.textContent = '저장';
+        tdSave.appendChild(btnSave);
+
+        const tdEmpty = document.createElement('td');
+
+        // 배달지 저장 함수 등록
+        btnSave.addEventListener('click', function(){
+            saveArea(inputNm.value, inputManager.value);
+        });
+
+        tr.appendChild(tdNm);
+        tr.appendChild(tdManager);
+        tr.appendChild(tdEmpty);
+        tr.appendChild(tdSave);
+
+        tbody.prepend(tr);
+    }
+</script>
+</body>
+</html>

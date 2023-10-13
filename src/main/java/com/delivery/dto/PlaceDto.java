@@ -26,6 +26,8 @@ public class PlaceDto {
 
     private DeliveryStatus deliveryStatus;
 
+    private Long areaId;
+
     private List<PlaceNewsDto> placeNewsDtoList = new ArrayList<>();
 
     private static ModelMapper modelMapper = new ModelMapper();

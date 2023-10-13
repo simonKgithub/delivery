@@ -20,7 +20,6 @@
     <form id="placeForm" action="/place/new" role="form" method="post">
         <button type="submit" id="saveNewPlaceBtn2">저장</button>
         <div>
-            <input type="text" id="areaId" name="areaId" hidden="true">
             <div>
                 <label for="xPoint">좌표</label>
                 <input type="text" id="xPoint" name="xPoint">
@@ -50,7 +49,6 @@
     const addPlaceNewsBtn = document.getElementById("addPlaceNewsBtn")
     const placeNewsDiv = document.getElementById("placeNewsDiv")
     const saveNewPlaceBtn = document.getElementById("saveNewPlaceBtn")
-    const areaId = document.getElementById("areaId")
     let placeNewsCnt = 0;
     let popupTargetId1;
     let popupTargetId2;
@@ -58,12 +56,6 @@
     /*ready*/
     document.addEventListener("DOMContentLoaded", function(){
         addPlaceNewsBtn.click();
-
-        // areaId Input에 추가
-        const url = window.location.href;
-        const paramSplit = url.split('/');
-        const id = paramSplit[paramSplit.length - 1];
-        areaId.setAttribute('value', id);
     });
 
     /*Listeners*/

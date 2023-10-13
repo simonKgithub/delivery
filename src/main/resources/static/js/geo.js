@@ -27,8 +27,8 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
             let detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
             detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
 
-            let content = '<div class="bAddr">' +
-                '<span class="title">법정동 주소정보</span>' +
+            let content = '<div class="bAddr" style="font-size:10px; width:200px;">' +
+                // '<span class="title">법정동 주소정보</span>' +
                 detailAddr +
                 '</div>';
 
@@ -41,7 +41,9 @@ kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
             infowindow.open(map, marker);
 
             // input창에 지번주소를 표시합니다.
-            inputPlaceNm.value = result[0].address.address_name;
+            if (inputPlaceNm != null) {
+                inputPlaceNm.value = result[0].address.address_name;
+            }
         }
     });
 });
@@ -70,7 +72,7 @@ function currentLocation() {
             searchDetailNowAddrFromCoords(position.coords, function(result, status){
                 if (status === kakao.maps.services.Status.OK) {
                     let locPosition = new kakao.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                    let content = '<div style="padding:5px;">현위치</div>'; // 인포윈도우에 표시될 내용
+                    let content = '<div style="padding:5px; font-size:10px; width:200px;">현위치</div>'; // 인포윈도우에 표시될 내용
 
                     // 마커를 클릭한 위치에 표시합니다
                     marker.setPosition(locPosition);
@@ -83,7 +85,9 @@ function currentLocation() {
                     map.setCenter(locPosition);
 
                     // input창에 지번주소를 표시합니다.
-                    inputPlaceNm.value = result[0].address.address_name;
+                    if (inputPlaceNm != null) {
+                        inputPlaceNm.value = result[0].address.address_name;
+                    }
                 }
             });
         }, function(error){console.error(error)}, { enableHighAccuracy: true, });

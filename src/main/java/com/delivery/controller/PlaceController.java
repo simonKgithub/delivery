@@ -9,6 +9,7 @@ import com.delivery.service.NewsService;
 import com.delivery.service.PlaceNewsService;
 import com.delivery.service.PlaceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -26,9 +27,10 @@ public class PlaceController {
     private final PlaceNewsService placeNewsService;
     private final NewsService newsService;
 
-    @GetMapping("/list")
-    public String getPlaceList(Model model){
-        List<PlaceDto> placeDtoList = placeService.findPlacesWithNews();
+    @GetMapping("/list/{areaId}")
+    public String getPlaceList(@PathVariable("areaId") Long areaId, Model model){
+
+        List<PlaceDto> placeDtoList = placeService.findPlacesWithNews(areaId);
         model.addAttribute("placeDtoList", placeDtoList);
 
         return "place/list";
@@ -43,23 +45,22 @@ public class PlaceController {
         return "place/newsPopup";
     }
 
-    @GetMapping("/new")
-    public String getPlaceForm() {
+    @GetMapping("/new/{areaId}")
+    public String getPlaceForm(@PathVariable("areaId") Long areaId) {
         return "place/placeForm";
     }
 
     @Transactional
     @PostMapping("/new")
-    public String postPlaceForm(PlaceDto placeDto, Model model) {
+    public String postPlaceForm(PlaceDto placeDto) {
         //유효성 체크 필요
 
         // 장소 저장 및 신문 저장
         Place newPlace = placeService.savePlace(placeDto);
         placeNewsService.savePlaceNews(placeDto.getPlaceNewsDtoList(), newPlace);
 
-        List<PlaceDto> placeDtoList = placeService.findPlacesWithNews();
-        model.addAttribute("placeDtoList", placeDtoList);
+        Long areaId = newPlace.getArea().getAreaId();
 
-        return "redirect:list";
+        return "redirect:list/" + areaId;
     }
 }

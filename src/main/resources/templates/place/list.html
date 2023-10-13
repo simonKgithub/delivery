@@ -28,8 +28,11 @@
 <div class="hAddr">
     <span class="title">지도중심기준 행정동 주소정보</span>
     <span id="centerAddr"></span>
-    <button id="moveToPlaceNewPage" onclick="moveToPlaceNewPage()">장소추가</button>
+    <button onclick="moveToPlaceNewPage()">장소추가</button>
     <button id="nowLocation">현 위치 검색</button>
+    <button id="trackingStartBtn">위치추적</button>
+    <button id="trackingEndBtn">위치추적종료</button>
+    <button id="deliveryStartBtn">배달시작</button>
 </div>
 <div id="map" style="width:50%;height:400px;"></div>
 <table th:object="${placeDtoList}">
@@ -38,50 +41,74 @@
             <th>순번</th>
             <th>상세설명</th>
             <th>주소</th>
-            <th>기타</th>
+            <th>신문</th>
         </tr>
     </thead>
     <tbody>
         <tr th:each="placeDto: ${placeDtoList}">
-            <td th:text="${placeDto.deliveryOrder}">순번</td>
+            <td th:text="${placeDto.deliveryOrder}" th:id="deliveryOrder">순번</td>
             <td th:text="${placeDto.placeDesc}">상세설명</td>
-            <td th:text="${placeDto.placeNm}">주소</td>
-            <td th:id="${placeDto.id}" type="button" >신문특징 서술하기</td>
+            <td th:text="${placeDto.placeNm}" th:id="placeNm">주소</td>
+            <td>
+                <div th:each="placeNewsDto : ${placeDto.placeNewsDtoList}"
+                    th:id="placeNewsDto" th:text="${placeNewsDto.placeNewsDesc + ': ' + placeNewsDto.placeNewsNm + ' ['+placeNewsDto.placeNewsCount + '개]'}" />
+            </td>
+            <td th:id="${placeDto.id}" type="button" hidden="true">신문특징 서술하기</td>
             <td th:id="xPoint" th:value="${placeDto.xPoint}" hidden="true">x좌표</td>
             <td th:id="yPoint" th:value="${placeDto.yPoint}" hidden="true">y좌표</td>
             <td th:id="deliveryStatus" th:value="${placeDto.deliveryStatus}" hidden="true">배달여부</td>
-            <td th:each="placeNewsDto : ${placeDto.placeNewsDtoList}" hidden="true">배달신문
-                <p th:id="placeNewsDto" th:text="${placeNewsDto.placeNewsDesc + ': ' + placeNewsDto.placeNewsNm + ' ['+placeNewsDto.placeNewsCount + '개]'}" />
-            </td>
         </tr>
     </tbody>
-    <!--<div th:object="${placeDtoList}">
-        <div th:each="placeDto: ${placeDtoList}">
-            <div th:id="${placeDto.id}">
-                순번[<label th:text="${placeDto.deliveryOrder}"></label>]
-                상세설명[<label th:text="${placeDto.placeDesc}"></label>]
-                주소[<label th:text="${placeDto.placeNm}"></label>]
-                <input th:type="text" hidden="true" th:value="${placeDto.xPoint}">
-                <input th:type="text" hidden="true" th:value="${placeDto.yPoint}">
-                <input th:type="text" hidden="true" th:value="${placeDto.deliveryStatus}">
-            </div>
-        </div>
-    </div>-->
 </table>
 
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f3e6f198f96e991c281488985ab9f6f5&libraries=services"></script>
 <script type="text/javascript" src="/js/geo.js"></script>
 <script type="text/javascript">
+    /* Parameter Area
+    * */
+    // 전역 변수
     const trTags = document.getElementsByTagName('tr');
+    const trackingStartBtn = document.getElementById('trackingStartBtn');
+    const trackingEndBtn = document.getElementById('trackingEndBtn');
+    const deliveryStartBtn = document.getElementById('deliveryStartBtn');
+    let deliveryOrderNum = 1;
+    let watchId;
+    // 선 구성 좌표 배열
+    let linePath = [];
+    const polyline = new kakao.maps.Polyline({
+        // path: linePath,         // 선 구성 좌표배열
+        strokeWeigth: 5,        // 선의 두께
+        strokeColor: 'rgba(254,0,0,0.55)', // 선의 색깔
+        strokeOpacity: 0.7,     // 선의 불투명도
+        strokeStyle: 'solid',   // 선의 스타일
+    });
+
+    /*함수 실행
+    * */
+    // 실행 시 선 그리기
+    drawXYPoints();
 
     /*AddEvent Area
     * */
+    // 길찾기(배달 시작)
+    deliveryStartBtn.addEventListener('click', deliveryStart);
+    // 위치 추적 종료 이벤트
+    trackingEndBtn.addEventListener('click', function(){
+        navigator.geolocation.clearWatch(watchId);
+    });
+    // 위치 추적 시작 버튼 클릭 이벤트
+    trackingStartBtn.addEventListener('click', currentPosition);
+
     // 클릭 이벤트 생성 및 좌표 구하기
     for (let i = 0; i < trTags.length; i++) {
         trTags[i].addEventListener("click", function(event){
-            const xPoint = event.target.parentElement.querySelector('#xPoint').getAttribute('value');
-            const yPoint = event.target.parentElement.querySelector('#yPoint').getAttribute('value');
-            const placeNewsDtos = event.target.parentElement.querySelectorAll('#placeNewsDto');
+            let target = event.target.parentElement;
+            if(target.nodeName === 'TD') {
+                target = target.parentElement;
+            }
+            const xPoint = target.querySelector('#xPoint').getAttribute('value');
+            const yPoint = target.querySelector('#yPoint').getAttribute('value');
+            const placeNewsDtos = target.querySelectorAll('#placeNewsDto');
 
             moveToXYPoint(xPoint, yPoint, placeNewsDtos);
         });
@@ -89,6 +116,127 @@
 
     /*Function Area
     * */
+    // 길찾기 웹 사이트 연결 함수
+    function findingDirections(sp, ep, callback){
+        //팝업으로 띄우기
+        const popupUrl =
+            'https://map.kakao.com/link/to/'+ep+'?sp='+sp+'&by=walk';
+            // 'kakaomap://route?sp='+sp+'&ep='+ep+'&by=FOOT'
+            // 'https://map.kakao.com/link/to/'+ep+'?sp='+sp+'&by=CAR';
+            // 'https://map.kakao.com/link/to/'+placeNm+','+ep.Ma+','+ep.La+'?by=walk'
+            // 'https://map.kakao.com/?sX='+sp.Ma+'&sY='+sp.La+'&eX='+ep.Ma+'&eY='+ep.La;
+        const width = 500;
+        const height = 400;
+        const left = (window.innerWidth - width) / 2;
+        const top = (window.innerHeight - height) / 2;
+
+        window.open(popupUrl, "_blank", "width=" + width + ",height=" + height + ",left=" + left + ", top=" + top);
+        /*let request = new XMLHttpRequest();
+
+        request.open('GET', 'https://api.openrouteservice.org/v2/directions/cycling-regular?api_key=5b3ce3597851110001cf624849a87a669b194306806d1e43ea33abf8&start='+sp+'&end='+ep);
+
+        request.setRequestHeader('Accept', 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8');
+
+        request.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                console.log('Status:', this.status);
+                console.log('Headers:', this.getAllResponseHeaders());
+                console.log('Body:', this.responseText);
+            }
+        };
+
+        request.send();*/
+    }
+    // 현재 위치 추적 함수
+    function currentPosition(){
+        if (navigator.geolocation) {
+            // 새로운 위치 정보가 감치될 때마다 호출되는 콜백함수
+            function updateCurrentPosition(position) {
+                let latitude = position.coords.latitude;
+                let longitude = position.coords.longitude;
+
+                const currentPosition = new kakao.maps.LatLng(latitude, longitude);
+
+                map.setCenter(currentPosition);
+
+                if (marker) {
+                    marker.setPosition(currentPosition);
+                } else {
+                    marker = new kakao.maps.Marker({
+                        position: currentPosition,
+                        map: map,
+                        title: '현재 위치',
+                    });
+                }
+            }
+
+            // watchPosition을 사용하여 현재 위치 변경 감지 시작
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(updateCurrentPosition);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+    }
+    // 배송 시작 함수
+    function deliveryStart() {
+        let startLat = trTags[deliveryOrderNum].querySelector('#xPoint').getAttribute('value');
+        let startLng = trTags[deliveryOrderNum].querySelector('#yPoint').getAttribute('value');
+
+        deliveryOrderNum++;
+        if (deliveryOrderNum > trTags.length) {return false;}
+
+        let endLat = trTags[deliveryOrderNum].querySelector('#xPoint').getAttribute('value');
+        let endLng = trTags[deliveryOrderNum].querySelector('#yPoint').getAttribute('value');
+        let placeNm = trTags[deliveryOrderNum].querySelector('#placeNm').textContent;
+
+
+        // 출발지와 도착지 좌표 설정
+        // let startLatLng = new kakao.maps.LatLng(startLat, startLng);
+        // let endLatLng = new kakao.maps.LatLng(endLat, endLng);
+
+        let startLatLng = startLng + ','+ startLat;
+        let endLatLng = endLng +','+ endLat;
+        // let endLatLng = placeNm+','+endLat+','+endLng;
+
+        //도착지 지번, 좌표
+
+        findingDirections(startLatLng, endLatLng, function(result){
+            console.log(result);
+        });
+
+    }
+    // 좌표에 따른 선 그리기 함수
+    function drawXYPoints(){
+        // 좌표에 따른 선 그리기 및 다른 이미지 마커 각각 생성
+        for (let i = 1; i < trTags.length; i++) {
+            let lat = trTags[i].querySelector('#xPoint').getAttribute('value');
+            let lng = trTags[i].querySelector('#yPoint').getAttribute('value');
+            let deliveryOrder = trTags[i].querySelector('#deliveryOrder').textContent;
+            let infoContent = '<div style="padding:5px;width:3px;">'+deliveryOrder+'</div>';
+
+            linePath.push(new kakao.maps.LatLng(lat, lng));
+
+            //마커 다른 이미지 생성
+            let imgSrc = '/images/news.jpg';
+            let imgSize = new kakao.maps.Size(32, 33);
+            let imgOption = {}; //{offset: new kakao.maps.Point(27, 69)}
+            let markerImg = new kakao.maps.MarkerImage(imgSrc, imgSize, imgOption);
+            let markerPosition = new kakao.maps.LatLng(lat, lng);
+            let newInfowindow = new kakao.maps.InfoWindow({zindex:1}); // 클릭한 위치에 대한 주소를 표시할 인포윈도우
+
+            let newMarker = new kakao.maps.Marker({
+                position: markerPosition,
+                image: markerImg,
+            });
+            newMarker.setMap(map);
+
+            newInfowindow.setContent(infoContent);
+            newInfowindow.open(map, newMarker);
+        }
+        polyline.setPath(linePath);
+        polyline.setMap(map);
+    }
     // 좌표로 지도 이동하기 및 윈도우 내용 표출
     function moveToXYPoint(xPoint, yPoint, placeNewsDtos){
         // HTML5의 geolocation으로 사용할 수 있는지 확인합니다
@@ -97,7 +245,7 @@
                 if (status === kakao.maps.services.Status.OK) {
                     let locPosition = new kakao.maps.LatLng(xPoint, yPoint);
                     let content = document.createElement('div');
-                    content.setAttribute('style', 'padding:5px');
+                    content.setAttribute('style', 'padding:5px; font-size:10px; width:200px;');
                     placeNewsDtos.forEach((placeNewsDto) => {
                         let innerContent = document.createElement('div');
                         innerContent.append(placeNewsDto.innerHTML);
@@ -124,7 +272,12 @@
     }
     // 장소 추가로 이동하기
     function moveToPlaceNewPage(){
-        window.location.href="/place/new";
+        //이러면 요청 시 url 변경하면 문제가 발생한다. dto 내에서 뽑아쓰는게 좋을 것 같다.
+        //-> 근데, 초기 추가에서는 어떻게 불러올 수 있을까?
+        const url = window.location.href;
+        const paramSplit = url.split('/');
+        const areaId = paramSplit[paramSplit.length - 1];
+        window.location.href="/place/new/" + areaId;
     }
 </script>
 </body>

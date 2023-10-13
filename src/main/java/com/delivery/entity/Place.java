@@ -34,6 +34,10 @@ public class Place {
     @Column(name = "delivery_order")
     private int deliveryOrder;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "area_id")
+    private Area area;
+
     @Enumerated(EnumType.STRING)
     private DeliveryStatus deliveryStatus;
 
