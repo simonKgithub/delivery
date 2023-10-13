@@ -30,4 +30,9 @@ public class AreaController {
     public AreaDto newAreaAddAjax(@RequestBody AreaDto areaDto){
         return areaService.save(areaDto);
     }
+
+    @DeleteMapping("/delete")
+    public void deleteAreaAjax(@RequestBody List<AreaDto> areaDtoList) {
+        System.out.println("areaDtoList = " + areaDtoList);
+    }
 }
