@@ -26,6 +26,7 @@ public class PlaceService {
     private final PlaceRepository placeRepository;
     private final PlaceNewsRepository placeNewsRepository;
     private final AreaRepository areaRepository;
+    private final PlaceNewsService placeNewsService;
 
     public Place savePlace(PlaceDto placeDto){
         Place place = new Place();
@@ -71,5 +72,31 @@ public class PlaceService {
         }
 
         return placeDtoList;
+    }
+
+    public void deletePlace(PlaceDto placeNewsDto) {
+        Place place = this.dtoToPlace(placeNewsDto);
+        Area area = areaRepository.findById(placeNewsDto.getAreaId()).orElseThrow(EntityNotFoundException::new);
+        place.setArea(area);
+
+        List<PlaceNews> placeNewsList = placeNewsService.findByPlace(place);
+
+        placeNewsList.forEach( placeNews -> {
+            placeNewsService.deletePlaceNews(placeNews);
+        });
+
+        placeRepository.delete(place);
+    }
+
+    public static Place dtoToPlace(PlaceDto placeDto) {
+        Place place = new Place();
+        place.setId(place.getId());
+        place.setXPoint(placeDto.getXPoint());
+        place.setYPoint(placeDto.getYPoint());
+        place.setPlaceNm(placeDto.getPlaceNm());
+        place.setPlaceDesc(placeDto.getPlaceDesc());
+        place.setDeliveryOrder(placeDto.getDeliveryOrder());
+        place.setDeliveryStatus(placeDto.getDeliveryStatus());
+        return place;
     }
 }

@@ -1,21 +1,17 @@
 package com.delivery.controller;
 
-import com.delivery.dto.PlaceNewsDto;
 import com.delivery.dto.PlaceDto;
 import com.delivery.entity.News;
 import com.delivery.entity.Place;
-import com.delivery.entity.PlaceNews;
 import com.delivery.service.NewsService;
 import com.delivery.service.PlaceNewsService;
 import com.delivery.service.PlaceService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -25,7 +21,6 @@ public class PlaceController {
 
     private final PlaceService placeService;
     private final PlaceNewsService placeNewsService;
-    private final NewsService newsService;
 
     @GetMapping("/list/{areaId}")
     public String getPlaceList(@PathVariable("areaId") Long areaId, Model model){
@@ -34,15 +29,6 @@ public class PlaceController {
         model.addAttribute("placeDtoList", placeDtoList);
 
         return "place/list";
-    }
-
-    @GetMapping("/openNewsPopup")
-    public String getOpenNewsPopup(Model model){
-        List<News> newsList = newsService.findAllNewspaper();
-
-        model.addAttribute("newsList", newsList);
-
-        return "place/newsPopup";
     }
 
     @GetMapping("/new/{areaId}")

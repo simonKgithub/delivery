@@ -1,0 +1,37 @@
+/*
+    table.css
+ */
+
+table {
+    width: 90%;
+    border-collapse: collapse;
+    padding: 10px;
+}
+th, td {
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background-color: #f2f2f2;
+}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+tr:hover {
+    background-color: #e5e5e5;
+}
+button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: transparent;
+    color: #333;
+    border: solid #eaeaea 2px;
+}
+input {
+    padding: 10px;
+    border: solid #eaeaea 2px;
+}
+.horizontal-button {
+    display: inline-block;
+    margin-right: 5px; /* 원하는 간격으로 조정 */
+}

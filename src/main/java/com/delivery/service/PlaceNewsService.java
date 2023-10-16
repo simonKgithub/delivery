@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -41,5 +42,13 @@ public class PlaceNewsService {
 
             placeNewsRepository.save(placeNews);
         }
+    }
+
+    public List<PlaceNews> findByPlace(Place place) {
+        return placeNewsRepository.findByPlace(place);
+    }
+
+    public void deletePlaceNews(PlaceNews placeNews) {
+        placeNewsRepository.delete(placeNews);
     }
 }

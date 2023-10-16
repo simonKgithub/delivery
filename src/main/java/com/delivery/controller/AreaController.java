@@ -33,6 +33,7 @@ public class AreaController {
 
     @DeleteMapping("/delete")
     public void deleteAreaAjax(@RequestBody List<AreaDto> areaDtoList) {
+        areaService.deleteArea(areaDtoList);
         System.out.println("areaDtoList = " + areaDtoList);
     }
 }

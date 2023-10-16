@@ -12,7 +12,7 @@ public class News {
 
     @Id @Column(name = "news_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long newsId;
 
     @Column(name = "news_nm")
     private String newsNm;

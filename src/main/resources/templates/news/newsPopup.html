@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>신문목록</title>
+    <link rel="stylesheet" href="/css/table.css">
+</head>
+<body>
+
+<div>
+    <table th:id="newsTable" th:object="${newsDtoList}">
+        <thead>
+            <tr>
+                <th></th>
+                <th>신문명</th>
+                <th>기타</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr th:each="newsDto: ${newsDtoList}">
+                <td><input th:id="${newsDto.newsId}" th:type="checkbox" th:class="newsChBox"></td>
+                <td th:id="${newsDto.newsId}" th:text="${newsDto.newsNm}"></td>
+                <td><button th:id="updateBtn">수정하기</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button id="addNewsBtn">신문추가</button>
+    <button id="deleteNewsBtn">선택삭제</button>
+</div>
+
+
+<script type="text/javascript">
+    /* Parameter Area
+    * */
+    const tdTags = document.getElementsByTagName('td');
+    const buttonTags = document.getElementsByTagName('button');
+    const addNewsBtn = document.getElementById('addNewsBtn');
+    const deleteNewsBtn = document.getElementById('deleteNewsBtn');
+    const tbody = document.getElementById('tbody');
+    const parentWindow = window.opener;
+
+    /*Add ListenerEvent Area
+    * */
+    // 팝업 내용 부모창에 전달하기
+    for (let i = 0; i < tdTags.length; i++) {
+        if (tdTags[i].getAttribute('id')){
+            tdTags[i].addEventListener("click", function(){
+                let params = {};
+                params.rtnData = this.innerHTML;
+                params.newsId = this.id;
+
+                if (confirm(params.rtnData + "을(를) 선택하시겠습니까?")) {
+                    parentWindow.applyData(params);
+                    window.close();
+                }
+            });
+        }
+    }
+    // 수정하기 버튼에 기능 입히기
+    for (let i = 0; i < buttonTags.length; i++) {
+        if (buttonTags[i].getAttribute('id') === 'updateBtn') {
+            buttonTags[i].addEventListener('click', updateNewsBtn);
+        }
+    }
+    // 신문추가 버튼 클릭
+    addNewsBtn.addEventListener('click', addNews);
+    // 선택삭제 버튼 클릭
+    deleteNewsBtn.addEventListener('click', deleteNews);
+
+    /*Function Area
+    * */
+    // 신문 추가 함수
+    function addNews(){
+        const newTr = document.createElement('tr');
+
+        const newChboxTd = document.createElement('td');
+
+        const newInputTd = document.createElement('td');
+        const newInput = document.createElement('input');
+
+        const newBtnTd = document.createElement('td');
+        const newBtn = document.createElement('button');
+        newBtn.setAttribute('class', 'horizontal-button');
+        const delBtn = document.createElement('button');
+        delBtn.setAttribute('class', 'horizontal-button');
+
+        newBtn.innerText = '저장';
+        newBtn.addEventListener('click', function(){
+            saveNews(newInput.value);
+        });
+
+        delBtn.innerText = '취소';
+        delBtn.addEventListener('click', function(){
+            newTr.remove();
+        })
+
+        newInputTd.appendChild(newInput);
+        newBtnTd.appendChild(newBtn)
+        newBtnTd.appendChild(delBtn);
+
+        newTr.appendChild(newChboxTd);
+        newTr.appendChild(newInputTd);
+        newTr.appendChild(newBtnTd);
+        tbody.appendChild(newTr);
+    }
+    // 신문 저장 함수(ajax)
+    function saveNews(newsNm) {
+        let object = {};
+        let xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function(){
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    //JSON 문자열을 객체로 변환
+                    let obj = JSON.parse(xhr.response);
+                    alert(obj['newsNm'] + " 을(를) 추가하였습니다.");
+                    location.reload();
+                } else {
+                    alert("신문 저장에 실패하였습니다.");
+                }
+            }
+        }
+
+        object['newsId'] = '';
+        object['newsNm'] = newsNm;
+
+        //객체를 JSON 문자열로 변환
+        const params = JSON.stringify(object);
+
+        xhr.open('POST', '/news/saveNews', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(params);
+    }
+    // 신문 삭제 함수(ajax)
+    function deleteNews() {
+        const deleteNewsList = [];
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+        checkboxes.forEach( checkbox => {
+            if (checkbox.checked) {
+                let obj = {"newsId": checkbox.id, "newsNm": ''};
+                deleteNewsList.push(obj);
+            }
+        });
+
+        if (deleteNewsList.length > 0) {
+            if (confirm('선택한 신물을 삭제하시겠습니까?')) {
+                let xhr = new XMLHttpRequest();
+
+                xhr.onreadystatechange = function(){
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            alert(xhr.responseText + '건 삭제되었습니다.');
+                        } else {
+                            alert('삭제에 실패하였습니다.');
+                        }
+                    }
+                }
+
+                const params = JSON.stringify(deleteNewsList);
+
+                xhr.open('DELETE', '/news/deleteNews', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(params);
+            }
+        } else {
+            alert('삭제할 신문을 선택해 주시기 바랍니다.');
+        }
+    }
+    // 신문 수정하기 버튼 함수
+    function updateNewsBtn() {
+        const newsTable = document.getElementById('newsTable');
+        const originalTr = this.parentElement.parentElement;
+        const rowIndex = originalTr.rowIndex;
+        const newsIds = originalTr.children;
+        let newsId;
+        for (const id of newsIds) {
+            if (id.getAttribute('id')) {
+                newsId = id.getAttribute('id');
+            }
+        }
+
+        originalTr.style.display = 'none';
+
+        let newTr = newsTable.insertRow(rowIndex);
+
+        const newChboxTd = document.createElement('td');
+
+        const newInputTd = document.createElement('td');
+        const newInput = document.createElement('input');
+
+        const newBtnTd = document.createElement('td');
+        const newBtn = document.createElement('button');
+        newBtn.setAttribute('class', 'horizontal-button');
+        const delBtn = document.createElement('button');
+        delBtn.setAttribute('class', 'horizontal-button');
+
+        newBtn.innerText = '수정';
+        newBtn.addEventListener('click', function(){
+            updateNews(newsId, newInput.value);
+        });
+
+        delBtn.innerText = '취소';
+        delBtn.addEventListener('click', function(){
+            originalTr.style.display = '';
+            newTr.remove();
+        })
+
+        newInputTd.appendChild(newInput);
+        newBtnTd.appendChild(newBtn)
+        newBtnTd.appendChild(delBtn);
+
+        newTr.appendChild(newChboxTd);
+        newTr.appendChild(newInputTd);
+        newTr.appendChild(newBtnTd);
+
+        newInput.focus();
+    }
+    // 신문 수정하기 함수
+    function updateNews(newsId, newsNm) {
+        let xhr = new XMLHttpRequest();
+        let object = {'newsId': newsId, 'newsNm': newsNm};
+
+        xhr.onreadystatechange = function(){
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    const obj = JSON.parse(xhr.response);
+                    alert(obj.newsNm + '(으)로 수정되었습니다.');
+                    location.reload();
+                } else {
+                    alert('수정에 실패하였습니다.');
+                }
+            }
+        }
+
+        const params = JSON.stringify(object);
+
+        xhr.open('PATCH', '/news/updateNews', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(params);
+    }
+</script>
+</body>
+</html>
